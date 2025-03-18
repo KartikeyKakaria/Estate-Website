@@ -1,9 +1,15 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  signInStart,
+  signInSuccess,
+  signInFailure,
+} from "../redux/user/userSlice";
 const SignIn = () => {
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const { loading, error } = useSelector((state) => state.user);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -12,7 +18,7 @@ const SignIn = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      setLoading(true);
+      dispatch(signInStart());
       const res = await fetch("/api/auth/signin", {
         method: "POST",
         headers: {
@@ -22,17 +28,14 @@ const SignIn = () => {
       });
       const data = await res.json();
       if (data.success == false) {
-        console.log(data)
-        setError(data.message);
-        setLoading(false);
+        console.log(data);
+        dispatch(signInFailure(data.message));
         return;
       }
-      console.log(data);
+      dispatch(signInSuccess(data));
       navigate("/");
-      setLoading(false);
     } catch (error) {
-      setError(error.message);
-      setLoading(false);
+      dispatch(signInFailure(error.message));
       return;
     }
     setFormData({}); // Clear form fields after submission
@@ -59,7 +62,7 @@ const SignIn = () => {
           disabled={loading}
           className="bg-slate-700 text-white p-3 rounded-md uppercase disabled:opacity-80 hover:cursor-pointer hover:opacity-90"
         >
-          {loading ? "Creating..." : "Sign In"}
+          {loading ? "Signing In..." : "Sign In"}
         </button>
         <div className="flex gap-2 mt-5">
           <p>Dont Have an account?</p>
