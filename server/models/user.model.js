@@ -16,6 +16,10 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
+    avatar:{
+      type: String,
+      default: process.env.DEFAULT_IMG_URL,
+    }
   },
   { timestamps: true }
 );
