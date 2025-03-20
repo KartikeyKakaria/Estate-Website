@@ -3,6 +3,7 @@ import { app } from "../firebase";
 import { useDispatch } from "react-redux";
 import { signInSuccess, signInFailure } from "../redux/user/userSlice";
 import { useNavigate } from "react-router-dom";
+
 function OAuth() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -24,7 +25,7 @@ function OAuth() {
       });
       const result = await res.json();
       dispatch(signInSuccess(result));
-      navigate("/")
+      navigate("/");
     } catch (error) {
       console.log("Couldn't sign in with google ", error);
       dispatch(signInFailure(error.message));
