@@ -1,13 +1,22 @@
 import { useSelector } from "react-redux";
+import { useRef } from "react";
 import useProtect from "../hooks/useProtect";
+
+// TODO: ADD IMAGE UPLOAD FUNCTIONALITY WITHOUT FIREBASE
+
 const Profile = () => {
+  const fileRef = useRef(null);
   useProtect();
   const { currentUser } = useSelector((state) => state.user);
   return (
     <div className="p-3 max-w-lg mx-auto">
       <h1 className="text-3xl font-semibold text-center my-7">Profile</h1>
       <form className="flex flex-col gap-4">
+        <input className="hidden" accept="image/*" ref={fileRef} type="file" />
         <img
+          onClick={() => {
+            fileRef.current.click();
+          }}
           className="rounded-full h-24 w-24 object-cover cursor-pointer self-center my-2"
           src={currentUser.avatar}
           alt=""
@@ -40,7 +49,6 @@ const Profile = () => {
           <span className="text-red-700 cursor-pointer">Delete Account</span>
           <span className="text-red-700 cursor-pointer">Sign Out</span>
         </div>
-
       </form>
     </div>
   );
