@@ -14,8 +14,9 @@ app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter);
 
 app.use((err, req, res, next) => {
-  console.log(err);
-  const statusCode = err[0] || 500;
+  err= err.toString().split(",");
+  console.log(err)
+  const statusCode = err[0].split(" ")[1] || 500;
   res.status(statusCode).json({
     success: false,
     statusCode,

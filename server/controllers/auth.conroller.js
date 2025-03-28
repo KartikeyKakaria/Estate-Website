@@ -48,7 +48,7 @@ export const google = async (req, res, next) => {
     const user = await User.findOne({ email });
     console.log(user, "found")
     if (user) {
-      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET);
+      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET);
       return res
         .cookie("access_token", token, { httpOnly: true })
         .status(200)

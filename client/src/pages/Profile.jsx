@@ -1,17 +1,51 @@
-import { useSelector } from "react-redux";
-import { useRef } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useRef, useState } from "react";
 import useProtect from "../hooks/useProtect";
+import {
+  updateUserFailure,
+  updateUserStart,
+  updateUserSuccess,
+} from "../redux/user/userSlice";
 
 // TODO: ADD IMAGE UPLOAD FUNCTIONALITY WITHOUT FIREBASE
 
 const Profile = () => {
+  const dispatch = useDispatch();
   const fileRef = useRef(null);
   useProtect();
-  const { currentUser } = useSelector((state) => state.user);
+  const { currentUser, loading, error } = useSelector((state) => state.user);
+  const [formData, setFormData] = useState({});
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      dispatch(updateUserStart());
+      const res = await fetch(`/api/user/update/${currentUser._id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      console.log(data)
+      if (data.success === false) {
+        dispatch(updateUserFailure(data.message));
+        return;
+      }
+      console.log(data);
+      dispatch(updateUserSuccess(data));
+    } catch (error) {
+      console.log(error)
+      dispatch(updateUserFailure(error.message));
+    }
+  };
   return (
     <div className="p-3 max-w-lg mx-auto">
       <h1 className="text-3xl font-semibold text-center my-7">Profile</h1>
-      <form className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <input className="hidden" accept="image/*" ref={fileRef} type="file" />
         <img
           onClick={() => {
@@ -22,18 +56,22 @@ const Profile = () => {
           alt=""
         />
         <input
+          defaultValue={currentUser.username}
           type="text"
           placeholder="username"
           className="bg-white border p-3 rounded-md "
           name="username"
           id="username"
+          onChange={handleChange}
         />
         <input
+          defaultValue={currentUser.email}
           type="text"
           placeholder="email"
           className="bg-white border p-3 rounded-md "
           name="email"
           id="email"
+          onChange={handleChange}
         />
         <input
           type="password"
@@ -41,15 +79,21 @@ const Profile = () => {
           className="bg-white border p-3 rounded-md "
           name="password"
           id="password"
+          onChange={handleChange}
         />
-        <button className="bg-slate-700 text-white rounded-md p-3 uppercase hover:opacity-95 cursor-pointer disabled:opacity-80">
-          Update
+        <button
+          disabled={loading}
+          type="submit"
+          className="bg-slate-700 text-white rounded-md p-3 uppercase hover:opacity-95 cursor-pointer disabled:opacity-80"
+        >
+          {loading ? "Updating..." : "Update"}
         </button>
         <div className="flex justify-between mt-3">
           <span className="text-red-700 cursor-pointer">Delete Account</span>
           <span className="text-red-700 cursor-pointer">Sign Out</span>
         </div>
       </form>
+      <p className="text-red-400 mt-4">{error ? error : ""}</p>
     </div>
   );
 };
