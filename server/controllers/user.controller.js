@@ -1,5 +1,20 @@
 import bcryptjs from "bcryptjs";
 import User from "../models/user.model.js";
+export const deleteUser = async (req, res, next) =>{
+  if(req.user.userId !== req.params.id){
+    return next([401, "Cannot delete someone else's profile"]);
+  }
+  try{
+    const result =await User.findByIdAndDelete(req.params.id);
+    console.log(result);
+    return res.status(200).json({
+      success:true,
+      message: "User deleted successfully",
+    }).clearCookie("access_token")
+  }catch(e){
+    next(e)
+  }
+}
 export const updateUser = async (req, res, next) => {
   if (req.user.userId !== req.params.id) {
     return next([401, "Cannot update someone else's profile"]);

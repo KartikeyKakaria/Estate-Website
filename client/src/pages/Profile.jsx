@@ -2,22 +2,46 @@ import { useSelector, useDispatch } from "react-redux";
 import { useRef, useState } from "react";
 import useProtect from "../hooks/useProtect";
 import {
+  deleteUserFailure,
+  deleteUserStart,
+  deleteUserSuccess,
   updateUserFailure,
   updateUserStart,
   updateUserSuccess,
 } from "../redux/user/userSlice";
+import { useNavigate } from "react-router";
 
 // TODO: ADD IMAGE UPLOAD FUNCTIONALITY WITHOUT FIREBASE
 
 const Profile = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const fileRef = useRef(null);
   useProtect();
   const { currentUser, loading, error } = useSelector((state) => state.user);
   const [formData, setFormData] = useState({});
+  const [success, updateSuccess] = useState(false);
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
+  const deleteUser = async()=>{
+    try{
+      dispatch(deleteUserStart());
+      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if(data.sucess === false){
+        dispatch(deleteUserFailure(data.message));
+        return;
+      }
+      dispatch(deleteUserSuccess());
+      navigate
+    }catch(e){
+      dispatch(deleteUserFailure(e.message))
+      navigate(`/sign-in`);
+    }
+  }
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -37,6 +61,7 @@ const Profile = () => {
       }
       console.log(data);
       dispatch(updateUserSuccess(data));
+      updateSuccess(true);
     } catch (error) {
       console.log(error)
       dispatch(updateUserFailure(error.message));
@@ -89,11 +114,12 @@ const Profile = () => {
           {loading ? "Updating..." : "Update"}
         </button>
         <div className="flex justify-between mt-3">
-          <span className="text-red-700 cursor-pointer">Delete Account</span>
+          <span onClick={deleteUser} className="text-red-700 cursor-pointer">Delete Account</span>
           <span className="text-red-700 cursor-pointer">Sign Out</span>
         </div>
       </form>
       <p className="text-red-400 mt-4">{error ? error : ""}</p>
+      <p className="text-green-400 mt-4">{success ? "User Updated successfully" : ""}</p>
     </div>
   );
 };
