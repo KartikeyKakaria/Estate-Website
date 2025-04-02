@@ -46,7 +46,7 @@ export const google = async (req, res, next) => {
   try {
     const { name, email, photo } = req.body;
     const user = await User.findOne({ email });
-    console.log(user, "found")
+    console.log(user, "found");
     if (user) {
       const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET);
       return res
@@ -65,7 +65,7 @@ export const google = async (req, res, next) => {
       avatar: photo,
     });
     const newUser = await createdUser.save();
-    console.log(newUser, "created")
+    console.log(newUser, "created");
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
     return res
       .cookie("access_token", token, { httpOnly: true })
@@ -73,5 +73,14 @@ export const google = async (req, res, next) => {
       .json({ password: null, ...newUser._doc });
   } catch (error) {
     next(error);
+  }
+};
+
+export const signout = async (req, res, next) => {
+  try {
+    res.clearCookie("access_token");
+    res.status(200).json({ success: true, message: "Logged out successfully" });
+  } catch (e) {
+    next(e.message);
   }
 };

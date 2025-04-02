@@ -24,24 +24,41 @@ const Profile = () => {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
-  const deleteUser = async()=>{
-    try{
+  const deleteUser = async () => {
+    try {
       dispatch(deleteUserStart());
       const res = await fetch(`/api/user/delete/${currentUser._id}`, {
         method: "DELETE",
       });
       const data = await res.json();
-      if(data.sucess === false){
+      if (data.sucess === false) {
         dispatch(deleteUserFailure(data.message));
         return;
       }
       dispatch(deleteUserSuccess());
-      navigate
-    }catch(e){
-      dispatch(deleteUserFailure(e.message))
+      navigate;
+    } catch (e) {
+      dispatch(deleteUserFailure(e.message));
       navigate(`/sign-in`);
     }
-  }
+  };
+
+  const handleSignout = async () => {
+    try {
+      dispatch(deleteUserStart());
+      const res = await fetch("/api/auth/signout");
+      const data = await res.json();
+      if (data.success === false) {
+        dispatch(deleteUserFailure(data.message));
+        return;
+      }
+      dispatch(deleteUserSuccess());
+      window.location.href = '/sign-in'
+    } catch (error) {
+      dispatch(deleteUserFailure(error));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -54,7 +71,7 @@ const Profile = () => {
         body: JSON.stringify(formData),
       });
       const data = await res.json();
-      console.log(data)
+      console.log(data);
       if (data.success === false) {
         dispatch(updateUserFailure(data.message));
         return;
@@ -63,7 +80,7 @@ const Profile = () => {
       dispatch(updateUserSuccess(data));
       updateSuccess(true);
     } catch (error) {
-      console.log(error)
+      console.log(error);
       dispatch(updateUserFailure(error.message));
     }
   };
@@ -114,12 +131,18 @@ const Profile = () => {
           {loading ? "Updating..." : "Update"}
         </button>
         <div className="flex justify-between mt-3">
-          <span onClick={deleteUser} className="text-red-700 cursor-pointer">Delete Account</span>
-          <span className="text-red-700 cursor-pointer">Sign Out</span>
+          <span onClick={deleteUser} className="text-red-700 cursor-pointer">
+            Delete Account
+          </span>
+          <span onClick={handleSignout} className="text-red-700 cursor-pointer">
+            Sign Out
+          </span>
         </div>
       </form>
       <p className="text-red-400 mt-4">{error ? error : ""}</p>
-      <p className="text-green-400 mt-4">{success ? "User Updated successfully" : ""}</p>
+      <p className="text-green-400 mt-4">
+        {success ? "User Updated successfully" : ""}
+      </p>
     </div>
   );
 };
