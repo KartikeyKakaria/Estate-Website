@@ -13,7 +13,7 @@ export const signup = async (req, res, next) => {
       .status(201)
       .json({ message: "User created successfully", user: result });
   } catch (error) {
-    next(error);
+    next(errorHandler(500, error));
   }
 };
 
@@ -26,7 +26,7 @@ export const signin = async (req, res, next) => {
     }
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      return next(errorHandler(404, "Wrong credentials"));
+      return next(errorHandler(401, "Wrong credentials"));
     }
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
@@ -38,7 +38,7 @@ export const signin = async (req, res, next) => {
       .status(200)
       .json({ ...user._doc, password: null });
   } catch (error) {
-    next(error);
+    next(errorHandler(500, error));
   }
 };
 
@@ -72,7 +72,7 @@ export const google = async (req, res, next) => {
       .status(201)
       .json({ password: null, ...newUser._doc });
   } catch (error) {
-    next(error);
+    next(errorHandler(500, error));
   }
 };
 
@@ -81,6 +81,6 @@ export const signout = async (req, res, next) => {
     res.clearCookie("access_token");
     res.status(200).json({ success: true, message: "Logged out successfully" });
   } catch (e) {
-    next(e);
+    next(errorHandler(500, e));
   }
 };

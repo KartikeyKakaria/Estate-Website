@@ -13,13 +13,24 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use((req, res, next) => {
   const { url } = req;
+  console.time();
   Logging.info(
     `Requesting Method:[${req.method}] -> ${url} from [${req.socket.remoteAddress}]`
   );
   res.on("finish", () => {
-    Logging.info(
-      `Responding Method:[${req.method}] -> ${url} from [${req.socket.remoteAddress}] status:[${res.statusCode}]`
-    );
+    if (
+      res.statusCode.toString()[0] === "2" ||
+      res.statusCode.toString()[0] === "3"
+    ) {
+      Logging.success(
+        `Responding Method:[${req.method}] -> ${url} from [${req.socket.remoteAddress}] status:[${res.statusCode}]`
+      );
+    } else {
+      Logging.warn(
+        `Responding Method:[${req.method}] -> ${url} from [${req.socket.remoteAddress}] status:[${res.statusCode}]`
+      );
+    }
+    console.timeEnd();
   });
   next();
 });
@@ -29,14 +40,12 @@ app.use("/api/auth", authRouter);
 app.use("/api/listing", listingRouter);
 
 app.use((err, req, res, next) => {
-  err = err.toString().split(",");
-  console.log(err);
-  const statusCode = err[0].split(" ")[1] || 500;
-  console.log(statusCode);
+  Logging.error(err);
+  const statusCode = err.statusCode;
   res.status(statusCode).json({
     success: false,
     statusCode,
-    message: err[1] || "Something went wrong",
+    message: err.message || "Something went wrong",
     error: process.env.NODE_ENV === "development" && err,
   });
 });
