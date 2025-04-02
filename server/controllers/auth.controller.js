@@ -66,7 +66,7 @@ export const google = async (req, res, next) => {
     });
     const newUser = await createdUser.save();
     console.log(newUser, "created");
-    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
+    const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET);
     return res
       .cookie("access_token", token, { httpOnly: true })
       .status(201)
@@ -81,6 +81,6 @@ export const signout = async (req, res, next) => {
     res.clearCookie("access_token");
     res.status(200).json({ success: true, message: "Logged out successfully" });
   } catch (e) {
-    next(e.message);
+    next(e);
   }
 };

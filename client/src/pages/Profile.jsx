@@ -14,10 +14,10 @@ import { useNavigate } from "react-router";
 // TODO: ADD IMAGE UPLOAD FUNCTIONALITY WITHOUT FIREBASE
 
 const Profile = () => {
+  useProtect();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const fileRef = useRef(null);
-  useProtect();
   const { currentUser, loading, error } = useSelector((state) => state.user);
   const [formData, setFormData] = useState({});
   const [success, updateSuccess] = useState(false);
@@ -53,7 +53,7 @@ const Profile = () => {
         return;
       }
       dispatch(deleteUserSuccess());
-      window.location.href = '/sign-in'
+      window.location.href = "/sign-in";
     } catch (error) {
       dispatch(deleteUserFailure(error));
     }
@@ -84,6 +84,7 @@ const Profile = () => {
       dispatch(updateUserFailure(error.message));
     }
   };
+  if (!currentUser) return;
   return (
     <div className="p-3 max-w-lg mx-auto">
       <h1 className="text-3xl font-semibold text-center my-7">Profile</h1>

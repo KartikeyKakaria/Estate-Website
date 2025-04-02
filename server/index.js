@@ -2,6 +2,7 @@ import express from "express";
 import db from "./db.js";
 import userRouter from "./routers/user.route.js";
 import authRouter from "./routers/auth.route.js";
+import listingRouter from "./routers/listing.route.js";
 import cookieParser from "cookie-parser";
 
 const app = express();
@@ -12,11 +13,13 @@ app.use(cookieParser());
 
 app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter);
+app.use("/api/listing", listingRouter);
 
 app.use((err, req, res, next) => {
   err= err.toString().split(",");
   console.log(err)
   const statusCode = err[0].split(" ")[1] || 500;
+  console.log(statusCode)
   res.status(statusCode).json({
     success: false,
     statusCode,

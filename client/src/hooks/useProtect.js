@@ -3,13 +3,11 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 
 export default function useProtect() {
-  const navigate = useNavigate();
   const { currentUser } = useSelector((state) => state.user);
+  const navigate = useNavigate();
   useEffect(() => {
-    if (!currentUser) {
+    if (currentUser === null) {
       navigate("/sign-in");
     }
-  }, []);
-
-  return currentUser;
+  }, [currentUser, navigate]);
 }
