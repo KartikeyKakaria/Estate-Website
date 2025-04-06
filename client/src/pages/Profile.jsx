@@ -1,3 +1,4 @@
+import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useRef, useState } from "react";
 import useProtect from "../hooks/useProtect";
@@ -10,19 +11,29 @@ import {
   updateUserSuccess,
 } from "../redux/user/userSlice";
 import { useNavigate } from "react-router";
+import convertImg from "../utils/base64.util.js";
 
 // TODO: ADD IMAGE UPLOAD FUNCTIONALITY WITHOUT FIREBASE
 
 const Profile = () => {
   useProtect();
+  const [tempSrc, setSrc] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const fileRef = useRef(null);
   const { currentUser, loading, error } = useSelector((state) => state.user);
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({
+    avatar: currentUser.avatar,
+  });
   const [success, updateSuccess] = useState(false);
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+  const handleImgUpload = async (e) => {
+    const file = e.target.files[0];
+    const base64 = await convertImg(file);
+    setFormData({ ...formData, avatar: base64 });
+    setSrc(base64);
   };
   const deleteUser = async () => {
     try {
@@ -89,13 +100,19 @@ const Profile = () => {
     <div className="p-3 max-w-lg mx-auto">
       <h1 className="text-3xl font-semibold text-center my-7">Profile</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <input className="hidden" accept="image/*" ref={fileRef} type="file" />
+        <input
+          onChange={handleImgUpload}
+          className="hidden"
+          accept="image/*"
+          ref={fileRef}
+          type="file"
+        />
         <img
           onClick={() => {
             fileRef.current.click();
           }}
           className="rounded-full h-24 w-24 object-cover cursor-pointer self-center my-2"
-          src={currentUser.avatar}
+          src={formData.avatar}
           alt=""
         />
         <input
