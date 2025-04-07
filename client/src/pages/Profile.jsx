@@ -10,14 +10,13 @@ import {
   updateUserStart,
   updateUserSuccess,
 } from "../redux/user/userSlice";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import convertImg from "../utils/base64.util.js";
 
 // TODO: ADD IMAGE UPLOAD FUNCTIONALITY WITHOUT FIREBASE
 
 const Profile = () => {
   useProtect();
-  const [tempSrc, setSrc] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const fileRef = useRef(null);
@@ -33,7 +32,6 @@ const Profile = () => {
     const file = e.target.files[0];
     const base64 = await convertImg(file);
     setFormData({ ...formData, avatar: base64 });
-    setSrc(base64);
   };
   const deleteUser = async () => {
     try {
@@ -148,6 +146,8 @@ const Profile = () => {
         >
           {loading ? "Updating..." : "Update"}
         </button>
+        <Link className="bg-green-700 text-white p-3 rounded-lg uppercase text-center hover:opacity-95" to={"/create-listing"}>
+        Create Listing</Link>
         <div className="flex justify-between mt-3">
           <span onClick={deleteUser} className="text-red-700 cursor-pointer">
             Delete Account

@@ -6,6 +6,7 @@ import SignUp from "./pages/SignUp";
 import Profile from "./pages/Profile";
 import About from "./pages/About";
 import Header from "./components/Header";
+import Create_Listing from "./pages/Create_Listing";
 const App = () => {
   return (
     <BrowserRouter>
@@ -17,6 +18,7 @@ const App = () => {
         <Route path="/profile" element={<Profile />} />
         <Route path="/about" element={<About />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/create-listing" element={<Create_Listing />} />
       </Routes>
     </BrowserRouter>
   );
