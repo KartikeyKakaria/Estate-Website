@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import useProtect from "../hooks/useProtect";
 import { useSelector } from "react-redux";
-import convertImg from "../utils/base64.util.js";
+import Notification from "../components/Notification";
 
 const Create_Listing = () => {
   useProtect();
@@ -40,6 +40,7 @@ const Create_Listing = () => {
       setLoading(false);
     } catch (e) {
       console.log(e);
+      setError(e);
     }
   };
 
@@ -194,7 +195,11 @@ const Create_Listing = () => {
             </button>
           </div>
           <div className="images flex flex-col gap-3">
-            <p className="text-red-800">{error}</p>
+            <Notification
+              color="red"
+              message={error}
+              fn={() => setError("")}
+            />
             {files.map((file) => {
               return (
                 <div
