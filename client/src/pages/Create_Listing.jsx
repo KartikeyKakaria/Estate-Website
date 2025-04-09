@@ -1,10 +1,48 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import useProtect from "../hooks/useProtect";
 import { useSelector } from "react-redux";
+import convertImg from "../utils/base64.util.js";
 
 const Create_Listing = () => {
   useProtect();
   const { currentUser } = useSelector((state) => state.user);
+  const filesRef = useRef(null);
+  const [loading, setLoading] = useState(false);
+  const [files, setFiles] = useState([]);
+  const [error, setError] = useState("");
+  const handleUpload = async (e) => {
+    e.preventDefault();
+    if (filesRef.current.files.length + files.length > 6) {
+      setError("Cannot Upload more than 6 images");
+      return;
+    }
+    setLoading(true);
+    try {
+      const promises = Array.from(filesRef.current.files).map((file) => {
+        return new Promise((resolve, reject) => {
+          const fileReader = new FileReader();
+          fileReader.readAsDataURL(file);
+          fileReader.onload = () => {
+            resolve({
+              name: file.name,
+              src: fileReader.result,
+              id: Math.random(),
+              file,
+            });
+          };
+          fileReader.onerror = (e) => {
+            reject(e);
+          };
+        });
+      });
+      const Data = await Promise.all(promises);
+      setFiles([...files, ...Data]);
+      setLoading(false);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   if (!currentUser) return;
   return (
     <div className="p-3 max-w-5xl mx-auto">
@@ -141,15 +179,57 @@ const Create_Listing = () => {
           </div>
           <div className="flex gap-4">
             <input
+              ref={filesRef}
               className="p-3 border border-gray-300 rounded-md w-full"
               type="file"
               id="images"
               accept="image/*"
               multiple
             />
-            <button className="p-3 cursor-pointer text-green-700 border border-green-700 rounded uppercase hover:bg-green-700 hover:text-white disabled:opacity-80">
-              Upload
+            <button
+              onClick={handleUpload}
+              className="p-3 cursor-pointer text-green-700 border border-green-700 rounded uppercase hover:bg-green-700 hover:text-white disabled:opacity-80"
+            >
+              {loading ? "Uploading..." : "Upload"}
             </button>
+          </div>
+          <div className="images flex flex-col gap-3">
+            <p className="text-red-800">{error}</p>
+            {files.map((file) => {
+              return (
+                <div
+                  key={file.id}
+                  className="flex gap-4 border-b-2 border-b-gray-700 p-2 justify-between items-center"
+                >
+                  <div className="flex gap-2 items-center">
+                    <img src={file.src} alt={file.name} className="h-20 w-30" />
+                    <p>{file.name}</p>
+                  </div>
+                  <button
+                    type="button"
+                    id={file.id}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setFiles(
+                        files.filter((comp) => {
+                          console.log(comp.id, e.target.id);
+                          return comp.id != e.target.id;
+                        })
+                      );
+                    }}
+                    className="text-red-500 border-none hover:bg-red-500 p-2 hover:text-white rounded-md cursor-pointer"
+                  >
+                    DELETE
+                  </button>
+                </div>
+              );
+            })}
+            <p
+              onClick={() => setFiles([])}
+              className="cursor-pointer text-green-500"
+            >
+              Clear All
+            </p>
           </div>
           <button className="p-3 bg-slate-700 text-white rounded-md uppercase hover:opacity-90 disabled:opacity-80 cursor-pointer">
             Create Listing
