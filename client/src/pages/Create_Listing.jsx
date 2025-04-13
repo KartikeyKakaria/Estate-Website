@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import useProtect from "../hooks/useProtect";
 import { useSelector } from "react-redux";
 import Notification from "../components/Notification";
@@ -25,6 +25,13 @@ const Create_Listing = () => {
     parking: false,
     furnished: false,
   });
+  useEffect(() => {
+    const imageSrc = files.map((image) => image.src);
+    setFormData({
+      ...formData,
+      imageUrls: imageSrc,
+    });
+  }, [files]);
   const handleChange = (e) => {
     if (e.target.id === "sell" || e.target.id === "rent") {
       setFormData({
@@ -70,7 +77,7 @@ const Create_Listing = () => {
       });
       const data = await res.json();
       console.log(data);
-      if (data.success == false) {
+      if (data.success === false) {
         setError(data.message);
       }
       setSubmitLoad(false);
@@ -106,12 +113,8 @@ const Create_Listing = () => {
         });
       });
       const Data = await Promise.all(promises);
-      const imageSrc = Data.map((image) => image.src);
       setFiles([...files, ...Data]);
-      setFormData({
-        ...formData,
-        imageUrls: imageSrc,
-      });
+
       setLoading(false);
     } catch (e) {
       console.log(e);
@@ -136,7 +139,7 @@ const Create_Listing = () => {
               className="bg-white border p-3 rounded-md"
               id="name"
               maxLength={62}
-              minLength={10}
+              minLength={6}
               required
               value={formData.name}
             />
@@ -219,7 +222,7 @@ const Create_Listing = () => {
               />
               <span>Offer</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <div className="flex items-center gap-2">
                 <input
                   className="p-2 bg-white border border-gray-300 rounded-sm"
@@ -257,29 +260,33 @@ const Create_Listing = () => {
                   name="regularPrice"
                   id="regularPrice"
                   min={1}
-                  max={100000000}
+                  max={1000000}
                   required
                 />
                 <div className="flex flex-col">
                   <p>Regular Price</p>
-                  <span>{`($/ month)`} </span>
+                  <span>{formData.type === "rent" && `($/ month)`} </span>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div
+                className={
+                  `flex items-center gap-2 ` + (!formData.offer && "hidden")
+                }
+              >
                 <input
                   onChange={handleChange}
                   value={formData.discountPrice}
                   className="p-2 bg-white border border-gray-300 rounded-sm"
                   type="number"
-                  name="discountPrice"
                   id="discountPrice"
+                  name="discountPrice"
                   min={1}
-                  max={10000000}
-                  required
+                  max={1000000}
+                  required={formData.offer}
                 />
                 <div className="flex flex-col">
                   <p>Discounted Price</p>
-                  <span>{`($/ month)`} </span>
+                  <span>{formData.type === "rent" && `($/ month)`} </span>
                 </div>
               </div>
             </div>
@@ -318,7 +325,6 @@ const Create_Listing = () => {
                 >
                   <div className="flex gap-2 items-center">
                     <img src={file.src} alt={file.name} className="h-20 w-30" />
-                    <p>{file.name}</p>
                   </div>
                   <button
                     type="button"
@@ -327,7 +333,6 @@ const Create_Listing = () => {
                       e.preventDefault();
                       setFiles(
                         files.filter((comp) => {
-                          console.log(comp.id, e.target.id);
                           return comp.id != e.target.id;
                         })
                       );
