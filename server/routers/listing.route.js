@@ -5,4 +5,5 @@ const listingRouter = Router();
 
 listingRouter.post("/create", verifyToken, createListing);
 
+
 export default listingRouter;

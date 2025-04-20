@@ -62,6 +62,10 @@ const Create_Listing = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (formData.imageUrls.length < 1)
+      return setError("Please upload atleast 1 image");
+    if (formData.discountPrice > formData.regularPrice)
+      return setError("Discounted price should be less");
     setSubmitLoad(true);
     try {
       setError(false);
