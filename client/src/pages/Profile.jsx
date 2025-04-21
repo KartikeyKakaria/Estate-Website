@@ -12,6 +12,7 @@ import {
 } from "../redux/user/userSlice";
 import { Link, useNavigate } from "react-router";
 import convertImg from "../utils/base64.util.js";
+import Notification from "../components/Notification.jsx";
 
 // TODO: ADD IMAGE UPLOAD FUNCTIONALITY WITHOUT FIREBASE
 
@@ -27,6 +28,7 @@ const Profile = () => {
   const [formData, setFormData] = useState({
     avatar: currentUser.avatar,
   });
+  const [msg, setMSG] = useState("");
   const [success, updateSuccess] = useState(false);
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -99,15 +101,20 @@ const Profile = () => {
 
   const handleDelete = async (e) => {
     const id = e.target.id;
-    try{
+    try {
       const res = await fetch(`/api/listing/delete/${id}`, {
-        method:"DELETE"
+        method: "DELETE",
       });
       const data = await res.json();
-      if(data.success === false) return console.log(data.message);
-      console.log(data)
-    }catch(err){
-      console.log(err)
+      if (data.success === false) {
+        setMSG(data.message);
+        return console.log(data);
+      }
+      setUserListings(userListings.filter((listing) => listing._id !== id));
+      setMSG("Listing Deleted successfully!");
+    } catch (err) {
+      setMSG(err.message);
+      console.log(err);
     }
   };
 
@@ -207,6 +214,7 @@ const Profile = () => {
       >
         {listingsLoading ? "Fetching..." : "Show Listings"}
       </button>
+      <Notification message={msg} fn={() => setMSG("")} color="red" />
       <p className="text-red-700 mt-5">
         {showListingError && "Error showing listings"}
       </p>
@@ -215,6 +223,7 @@ const Profile = () => {
           <h1 className="text-center font-semibold text-2xl mt-7">
             Your Listings
           </h1>
+
           {userListings.map((listing) => {
             console.log(listing);
             return (

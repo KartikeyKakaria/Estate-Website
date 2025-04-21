@@ -6,7 +6,7 @@ const Notification = ({ color, message, fn }) => {
       style={{
         background: color,
       }}
-      className={message ? `flex justify-between p-2 rounded-md` : "hidden"}
+      className={message ? `flex justify-between p-2 rounded-md my-2` : "hidden"}
     >
       <p className="text-black">{message}</p>
       <button onClick={fn}>❌</button>

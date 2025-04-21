@@ -57,15 +57,16 @@ const Create_Listing = () => {
         [e.target.id]: e.target.value,
       });
     }
-    console.log(formData);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.imageUrls.length < 1)
       return setError("Please upload atleast 1 image");
-    if (formData.discountPrice > formData.regularPrice)
+    if (formData.discountPrice > formData.regularPrice){
+      console.log(formData.discountPrice, formData.regularPrice)
       return setError("Discounted price should be less");
+    }
     setSubmitLoad(true);
     try {
       setError(false);
@@ -286,7 +287,7 @@ const Create_Listing = () => {
                   name="discountPrice"
                   min={1}
                   max={1000000}
-                  required={formData.offer}
+                  
                 />
                 <div className="flex flex-col">
                   <p>Discounted Price</p>
