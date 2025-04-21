@@ -49,12 +49,14 @@ export const updateUser = async (req, res, next) => {
 };
 
 export const getUserListing = async (req, res, next) => {
-  console.log(req.user.userId, req.params.id)
-  if (req.user.userId === req.params.id) {
-    const listings = await Listing.find({ userRef: req.params.id });
-    res.status(200).json(listings);
-  } else {
-    return next(errorHandler(400, "cannot get someone else's listings"));
+  try {
+    if (req.user.userId === req.params.id) {
+      const listings = await Listing.find({ userRef: req.params.id });
+      return res.status(200).json({ success: true, listings });
+    } else {
+      return next(errorHandler(400, "cannot get someone else's listings"));
+    }
+  } catch (e) {
+    next(500, e);
   }
 };
-

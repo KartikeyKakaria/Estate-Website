@@ -21,6 +21,9 @@ const Profile = () => {
   const navigate = useNavigate();
   const fileRef = useRef(null);
   const { currentUser, loading, error } = useSelector((state) => state.user);
+  const [showListingError, setSLEerror] = useState(false);
+  const [listingsLoading, setListLoading] = useState(false);
+  const [userListings, setUserListings] = useState([]);
   const [formData, setFormData] = useState({
     avatar: currentUser.avatar,
   });
@@ -82,7 +85,7 @@ const Profile = () => {
       const data = await res.json();
       console.log(data);
       if (data.success === false) {
-        dispatch(updateUserFailure(data.message));
+        dispatch(updateUserFailure(JSON.stringify(data.message)));
         return;
       }
       console.log(data);
@@ -90,7 +93,40 @@ const Profile = () => {
       updateSuccess(true);
     } catch (error) {
       console.log(error);
-      dispatch(updateUserFailure(error.message));
+      dispatch(updateUserFailure(JSON.stringify(error.message)));
+    }
+  };
+
+  const handleDelete = async (e) => {
+    const id = e.target.id;
+    try{
+      const res = await fetch(`/api/listing/delete/${id}`, {
+        method:"DELETE"
+      });
+      const data = await res.json();
+      if(data.success === false) return console.log(data.message);
+      console.log(data)
+    }catch(err){
+      console.log(err)
+    }
+  };
+
+  const handleShowListings = async (e) => {
+    try {
+      setListLoading(true);
+      const res = await fetch(`/api/user/listings/${currentUser._id}`);
+      const data = await res.json();
+      if (!data.success) {
+        setSLEerror(true);
+        setListLoading(false);
+        return;
+      }
+      setUserListings(data.listings);
+      console.log(data.listings);
+      setListLoading(false);
+    } catch (e) {
+      setSLEerror(true);
+      setListLoading(false);
     }
   };
   if (!currentUser) return;
@@ -146,8 +182,12 @@ const Profile = () => {
         >
           {loading ? "Updating..." : "Update"}
         </button>
-        <Link className="bg-green-700 text-white p-3 rounded-lg uppercase text-center hover:opacity-95" to={"/create-listing"}>
-        Create Listing</Link>
+        <Link
+          className="bg-green-700 text-white p-3 rounded-lg uppercase text-center hover:opacity-95"
+          to={"/create-listing"}
+        >
+          Create Listing
+        </Link>
         <div className="flex justify-between mt-3">
           <span onClick={deleteUser} className="text-red-700 cursor-pointer">
             Delete Account
@@ -161,6 +201,58 @@ const Profile = () => {
       <p className="text-green-400 mt-4">
         {success ? "User Updated successfully" : ""}
       </p>
+      <button
+        className="text-green-800 w-full cursor-pointer"
+        onClick={handleShowListings}
+      >
+        {listingsLoading ? "Fetching..." : "Show Listings"}
+      </button>
+      <p className="text-red-700 mt-5">
+        {showListingError && "Error showing listings"}
+      </p>
+      {userListings && userListings.length > 0 && (
+        <div className="flex flex-col gap-4">
+          <h1 className="text-center font-semibold text-2xl mt-7">
+            Your Listings
+          </h1>
+          {userListings.map((listing) => {
+            console.log(listing);
+            return (
+              <div
+                key={listing._id}
+                className="shadow shadow-black rounded-lg p-3"
+              >
+                <div className="cursor-auto flex justify-between items-center gap-2">
+                  <Link to={`/listing/${listing._id}`}>
+                    <img
+                      className="cursor-pointer h-16 w-30 rounded-md onject-contain"
+                      src={listing.imageUrls[0]}
+                      alt="listing cover"
+                    />
+                  </Link>
+                  <Link to={`/listing/${listing._id}`}>
+                    <p className="cursor-pointer text-green-950 font-semibold truncate hover:underline flex-1">
+                      {listing.name}
+                    </p>
+                  </Link>
+                  <div className="flex flex-col items-center gap-2">
+                    <button
+                      id={listing._id}
+                      onClick={handleDelete}
+                      className="text-red-800 uppercase cursor-pointer"
+                    >
+                      DELETE
+                    </button>
+                    <button className="text-green-800 uppercase cursor-pointer">
+                      EDIT
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
